@@ -48,16 +48,31 @@ class MakeAuthorizer extends GeneratorCommand
      * @param string $rootNamespace
      * @return string
      */
-    protected function getDefaultNamespace($rootNamespace)
+    protected function getDefaultNamespace($rootNamespace): string
     {
-        if ($this->option('resource')) {
-            return parent::getDefaultNamespace($rootNamespace);
+        if ($this->shouldUseResourceNamespace()) {
+            return $this->getResourceNamespace($rootNamespace);
         }
 
-        $jsonApi = trim(config('jsonapi.namespace') ?: 'JsonApi', '\\');
-
-        return $rootNamespace . '\\' . $jsonApi . '\\' . 'Authorizers';
+        return $this->getJsonApiAuthorizersNamespace($rootNamespace);
     }
+
+    private function shouldUseResourceNamespace(): bool
+    {
+        return $this->option('resource');
+    }
+
+    private function getResourceNamespace($rootNamespace): string
+    {
+        return parent::getDefaultNamespace($rootNamespace);
+    }
+
+    private function getJsonApiAuthorizersNamespace($rootNamespace): string
+    {
+        $jsonApiNamespace = trim(config('jsonapi.namespace') ?: 'JsonApi', '\\');
+        return $rootNamespace . '\\' . $jsonApiNamespace . '\\' . 'Authorizers';
+    }
+
 
     /**
      * @inheritDoc
@@ -78,5 +93,4 @@ class MakeAuthorizer extends GeneratorCommand
             ['server', 's', InputOption::VALUE_REQUIRED, 'The JSON:API server the schema exists in.'],
         ];
     }
-
 }
