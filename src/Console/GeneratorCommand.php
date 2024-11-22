@@ -30,26 +30,40 @@ abstract class GeneratorCommand extends BaseGeneratorCommand
     /**
      * @inheritDoc
      */
-    public function handle()
+    public function handle(): int
+    {
+        $this->validateServerInput();
+
+        if ($this->shouldAbortCommandExecution()) {
+            return 1;
+        }
+
+        $this->executeParentHandle();
+
+        return 0;
+    }
+
+    private function validateServerInput(): void
     {
         $server = $this->getServerInput();
 
         if ($this->doesRequireServer() && empty($server)) {
             $this->error('You must use the server option when you have more than one API.');
-            return 1;
-        }
-
-        if (!empty($server) && is_null($this->getServerNamespace($server))) {
+        } elseif (!empty($server) && is_null($this->getServerNamespace($server))) {
             $this->error("Server {$server} does not exist in your jsonapi.servers configuration.");
-            return 1;
         }
-
-        if (false === parent::handle()) {
-            return 1;
-        }
-
-        return 0;
     }
+
+    private function shouldAbortCommandExecution(): bool
+    {
+        return $this->hasValidationErrors();
+    }
+
+    private function executeParentHandle(): bool
+    {
+        return parent::handle();
+    }
+
 
     /**
      * @inheritDoc
@@ -153,5 +167,4 @@ abstract class GeneratorCommand extends BaseGeneratorCommand
             ['name', InputArgument::REQUIRED, 'The name of the JSON:API resource type.'],
         ];
     }
-
 }
