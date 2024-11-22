@@ -31,12 +31,18 @@ final class LaravelJsonApi
      */
     public static function registerAuthorizer(string $authorizerClass, $schemaClasses): self
     {
-        foreach (Arr::wrap($schemaClasses) as $schemaClass) {
-            AuthorizerResolver::register($schemaClass, $authorizerClass);
-        }
+        self::registerAuthorizerForSchemaClasses($authorizerClass, $schemaClasses);
 
         return new self();
     }
+
+    private static function registerAuthorizerForSchemaClasses(string $authorizerClass, $schemaClasses): void
+    {
+        foreach (Arr::wrap($schemaClasses) as $schemaClass) {
+            AuthorizerResolver::register($schemaClass, $authorizerClass);
+        }
+    }
+
 
     /**
      * Set the default authorizer implementation.
